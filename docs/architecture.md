@@ -68,9 +68,13 @@ Resources that can exist in multiple namespaces (v2 feature):
 4. Backend processes and enriches data:
    - Determines scope (cluster/namespace)
    - Identifies relationships (owner references, labels)
-   - Extracts status conditions
+   - Extracts status conditions (Installed, Healthy, Established, Ready)
+   - Extracts package/group information from spec fields
 5. Backend returns JSON to frontend
-6. Frontend renders data with appropriate UI components
+6. Frontend renders data with appropriate UI components:
+   - Detailed status badges showing resource-specific conditions
+   - Package/Group column for understanding resource organization
+   - Scope badges for cluster vs namespace visibility
 
 ## Security Model
 

@@ -3,6 +3,7 @@
 import { ResourceListPage } from "@/components/resources/resource-list-page";
 import { ScopeBadge } from "@/components/ui/status-badge";
 import { formatDistanceToNow } from "@/lib/date-utils";
+import { getResourcePackage } from "@/lib/resource-utils";
 import { api } from "@/lib/api";
 
 /**
@@ -17,6 +18,18 @@ export default function ProviderConfigsPage() {
       render: (_: any, resource: any) => (
         <div className="font-medium">{resource.metadata.name}</div>
       ),
+    },
+    {
+      key: "package",
+      label: "Package / Group",
+      render: (_: any, resource: any) => {
+        const pkg = getResourcePackage(resource);
+        return pkg ? (
+          <span className="text-sm font-mono text-muted-foreground">{pkg}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground/50">-</span>
+        );
+      },
     },
     {
       key: "scope",

@@ -83,11 +83,46 @@ crossplane-spy/
 - Detect scope (cluster/namespace) automatically
 - Handle missing resources gracefully (return empty lists)
 
+**Backend - Status Handling**
+Different Crossplane resources have different status conditions:
+- **Providers & Functions**: Check `Installed` + `Healthy` conditions
+- **XRDs**: Check `Established` condition
+- **Compositions**: No status (they are templates)
+- **ProviderConfigs**: May not have meaningful status depending on the provider
+- **XRs**: Check `Ready` or `Synced` conditions
+
+Status converters are in `backend/internal/models/converter.go`:
+- `IsProviderHealthy()` - Returns (installed, healthy) booleans
+- `IsFunctionHealthy()` - Returns (installed, healthy) booleans
+- `IsXRDEstablished()` - Returns established boolean
+- `IsResourceReady()` - Generic fallback for "Ready" condition
+
+**Backend - Package/Group Extraction**
+Resources expose their package/group differently:
+- **Providers & Functions**: `spec.package` contains full package path
+- **XRDs**: `spec.group` contains API group
+- **Compositions**: `spec.compositeTypeRef.apiVersion` contains group/version
+- **ProviderConfigs & XRs**: `apiVersion` field contains group/version
+
+Extract these in converters using `unstructured.NestedString()`.
+
 **Frontend - Data Fetching**
 - Client-side fetching with `useEffect` in "use client" components
 - Show loading states
 - Handle errors with user-friendly messages
 - Use the `ResourceListPage` component for consistency
+
+**Frontend - Status Display**
+- Use `DetailedStatusBadge` for resources with specific status fields (Providers, Functions, XRDs)
+- Use simple `StatusBadge` for generic Ready status
+- Hide Status column for resources without meaningful status (Compositions, ProviderConfigs)
+- Custom columns can be passed to `ResourceListPage` via the `columns` prop
+
+**Frontend - Package/Group Display**
+- Use `getResourcePackage()` from `lib/resource-utils.ts` to extract package/group
+- Display in monospace font for clarity
+- Shows "-" if no package information available
+- Format varies by resource type (full path for Providers/Functions, API group for XRDs)
 
 ### Common Issues & Solutions
 
@@ -103,6 +138,23 @@ crossplane-spy/
 **Frontend build errors**
 - Ensure `autoprefixer` is in devDependencies
 - Run `npm install` in `frontend/` directory
+
+**Resources showing "Not Ready" incorrectly**
+- Check which status conditions the resource type uses:
+  - Providers/Functions: Need both "Installed" AND "Healthy" conditions
+  - XRDs: Need "Established" condition
+  - Compositions: Have no status (this is normal)
+  - ProviderConfigs: May not have status depending on provider type
+- Verify with `kubectl get <resource> <name> -o yaml` to see actual conditions
+- Status is correctly extracted if both backend converter and frontend badge are updated
+
+**Package/Group column shows "-"**
+- Check that backend converter extracts the spec fields:
+  - For Providers/Functions: Ensure `spec.package` is populated in the model
+  - For XRDs: Ensure `spec.group` is populated
+  - For Compositions: Ensure `spec.compositeTypeRef.apiVersion` is extracted
+- Use `curl http://localhost:8080/api/v1/<resources>` to verify API response
+- Frontend extracts package using `getResourcePackage()` utility function
 
 ## Development Workflow
 
@@ -182,7 +234,9 @@ Backend serves both API and frontend:
 - `frontend/app/layout.tsx` - Root layout with sidebar navigation
 - `frontend/components/resources/resource-list-page.tsx` - Reusable page for listing resources
 - `frontend/components/resources/resource-table.tsx` - Table component with scope/status badges
+- `frontend/components/ui/status-badge.tsx` - Status badges (simple + detailed)
 - `frontend/lib/api.ts` - API client for backend communication
+- `frontend/lib/resource-utils.ts` - Utilities for extracting package/group from resources
 - `frontend/types/crossplane.ts` - TypeScript types for Crossplane resources
 
 ## Important Constraints

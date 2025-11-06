@@ -292,8 +292,14 @@ func convertToProviders(items []unstructured.Unstructured) []models.Provider {
 		// A Provider is "Ready" if both Installed and Healthy are true
 		resourceStatus.Ready = installed && healthy
 
+		// Extract package from spec
+		pkg, _, _ := unstructured.NestedString(item.Object, "spec", "package")
+
 		provider := models.Provider{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
+			Spec: models.ProviderSpec{
+				Package: pkg,
+			},
 			Status: models.ProviderStatus{
 				ResourceStatus:  resourceStatus,
 				Installed:       installed,
@@ -326,8 +332,14 @@ func convertToXRDs(items []unstructured.Unstructured) []models.XRD {
 		// An XRD is "Ready" if Established is true
 		resourceStatus.Ready = established
 
+		// Extract group from spec
+		group, _, _ := unstructured.NestedString(item.Object, "spec", "group")
+
 		xrd := models.XRD{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
+			Spec: models.XRDSpec{
+				Group: group,
+			},
 			Status: models.XRDStatus{
 				ResourceStatus: resourceStatus,
 				Established:    established,
@@ -341,9 +353,19 @@ func convertToXRDs(items []unstructured.Unstructured) []models.XRD {
 func convertToCompositions(items []unstructured.Unstructured) []models.Composition {
 	compositions := make([]models.Composition, 0, len(items))
 	for _, item := range items {
+		// Extract compositeTypeRef.apiVersion from spec
+		apiVersion, _, _ := unstructured.NestedString(item.Object, "spec", "compositeTypeRef", "apiVersion")
+		kind, _, _ := unstructured.NestedString(item.Object, "spec", "compositeTypeRef", "kind")
+
 		composition := models.Composition{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
-			Status:       models.CompositionStatus{ResourceStatus: models.ConvertToResourceStatus(&item)},
+			Spec: models.CompositionSpec{
+				CompositeTypeRef: models.TypeReference{
+					APIVersion: apiVersion,
+					Kind:       kind,
+				},
+			},
+			Status: models.CompositionStatus{ResourceStatus: models.ConvertToResourceStatus(&item)},
 		}
 		compositions = append(compositions, composition)
 	}
@@ -359,8 +381,14 @@ func convertToFunctions(items []unstructured.Unstructured) []models.Function {
 		// A Function is "Ready" if both Installed and Healthy are true
 		resourceStatus.Ready = installed && healthy
 
+		// Extract package from spec
+		pkg, _, _ := unstructured.NestedString(item.Object, "spec", "package")
+
 		function := models.Function{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
+			Spec: models.FunctionSpec{
+				Package: pkg,
+			},
 			Status: models.FunctionStatus{
 				ResourceStatus: resourceStatus,
 				Installed:      installed,

@@ -21,10 +21,12 @@ Data are frequently refreshed to see any changes.
 
 - **Resource Discovery**: Automatically discover all Crossplane resources in your cluster
 - **Scope Awareness**: Clear distinction between cluster-scoped and namespace-scoped resources
-- **Status Monitoring**: View resource status conditions and health
+- **Detailed Status Monitoring**:
+  - Providers & Functions: View Installed + Healthy status
+  - XRDs: View Established status
+  - Composite Resources: View Ready/Synced status
+- **Package Organization**: Display package and API group for each resource to understand naming strategies
 - **Relationship Mapping**: Understand connections between resources (XRDs, Compositions, XRs)
-- **Filtering**: Multi-criteria filtering to quickly find what you need
-- **Real-time Updates**: Automatic data refresh to see changes as they happen
 - **Educational Tool**: Helps visualize Crossplane v2 concepts and multi-tenancy
 
 ## Quick Start

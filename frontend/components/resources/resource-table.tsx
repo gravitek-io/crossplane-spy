@@ -1,5 +1,6 @@
 import { StatusBadge, ScopeBadge, DetailedStatusBadge } from "@/components/ui/status-badge";
 import { formatDistanceToNow } from "@/lib/date-utils";
+import { getResourcePackage } from "@/lib/resource-utils";
 
 /**
  * Generic resource table component
@@ -28,6 +29,18 @@ export function ResourceTable({ resources, columns }: ResourceTableProps) {
           )}
         </div>
       ),
+    },
+    {
+      key: "package",
+      label: "Package / Group",
+      render: (_: any, resource: any) => {
+        const pkg = getResourcePackage(resource);
+        return pkg ? (
+          <span className="text-sm font-mono text-muted-foreground">{pkg}</span>
+        ) : (
+          <span className="text-sm text-muted-foreground/50">-</span>
+        );
+      },
     },
     {
       key: "scope",
