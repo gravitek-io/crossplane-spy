@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Node
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/.turbo
+
+# Go
+backend/vendor
+backend/crossplane-spy
+*.test
+*.out
+
+# Helm
+helm/
+
+# CI/CD
+.github/
+
+# Temporary files
+tmp/
+temp/
+*.log
+
+# Environment
+.env
+.env.local

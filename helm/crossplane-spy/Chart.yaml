@@ -1,0 +1,17 @@
+apiVersion: v2
+name: crossplane-spy
+description: A dashboard for visualizing Crossplane v2 resources
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - crossplane
+  - dashboard
+  - kubernetes
+  - monitoring
+home: https://github.com/gravitek/crossplane-spy
+sources:
+  - https://github.com/gravitek/crossplane-spy
+maintainers:
+  - name: Gravitek
+    url: https://github.com/gravitek

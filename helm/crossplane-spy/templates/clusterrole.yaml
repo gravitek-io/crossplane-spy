@@ -1,0 +1,52 @@
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "crossplane-spy.fullname" . }}
+  labels:
+    {{- include "crossplane-spy.labels" . | nindent 4 }}
+rules:
+  # Read access to Crossplane core resources
+  - apiGroups:
+      - pkg.crossplane.io
+    resources:
+      - providers
+      - providerrevisions
+      - functions
+      - functionrevisions
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Read access to XRDs and Compositions
+  - apiGroups:
+      - apiextensions.crossplane.io
+    resources:
+      - compositeresourcedefinitions
+      - compositions
+      - compositionrevisions
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Read access to discover custom resources (XRs)
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - get
+      - list
+      - watch
+
+  # Discovery API access
+  - nonResourceURLs:
+      - "/api"
+      - "/api/*"
+      - "/apis"
+      - "/apis/*"
+    verbs:
+      - get
+{{- end }}

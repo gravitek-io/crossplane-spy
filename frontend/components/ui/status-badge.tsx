@@ -1,0 +1,57 @@
+import { cn } from "@/lib/utils";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+
+/**
+ * Status badge component for displaying resource status
+ */
+interface StatusBadgeProps {
+  ready: boolean;
+  className?: string;
+}
+
+export function StatusBadge({ ready, className }: StatusBadgeProps) {
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+        ready
+          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+        className
+      )}
+    >
+      {ready ? (
+        <CheckCircle2 className="h-3 w-3" />
+      ) : (
+        <AlertCircle className="h-3 w-3" />
+      )}
+      <span>{ready ? "Ready" : "Not Ready"}</span>
+    </div>
+  );
+}
+
+/**
+ * Scope badge component
+ */
+interface ScopeBadgeProps {
+  scope: "cluster" | "namespace";
+  namespace?: string;
+  className?: string;
+}
+
+export function ScopeBadge({ scope, namespace, className }: ScopeBadgeProps) {
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium",
+        scope === "cluster"
+          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+        className
+      )}
+    >
+      <span className="font-semibold">{scope === "cluster" ? "Cluster" : "Namespace"}</span>
+      {namespace && <span className="text-muted-foreground">· {namespace}</span>}
+    </div>
+  );
+}
