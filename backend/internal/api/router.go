@@ -14,6 +14,9 @@ func NewRouter(k8sClient *k8s.Client) *gin.Engine {
 	// CORS middleware for Next.js frontend
 	router.Use(corsMiddleware())
 
+	// API documentation page
+	router.GET("/", apiDocs)
+
 	// Health check endpoint
 	router.GET("/health", healthCheck)
 
@@ -38,14 +41,13 @@ func NewRouter(k8sClient *k8s.Client) *gin.Engine {
 		v1.GET("/namespace-resources", getNamespaceResources(k8sClient))
 	}
 
-	// Serve frontend static files
-	router.Static("/_next", "/app/public/_next")
-	router.StaticFile("/favicon.ico", "/app/public/favicon.ico")
-
-	// Serve index.html for all other routes (SPA routing)
-	router.NoRoute(func(c *gin.Context) {
-		c.File("/app/public/index.html")
-	})
+	// Serve frontend static files (only in production/Docker)
+	// In development, frontend runs separately on :3000
+	// router.Static("/_next", "/app/public/_next")
+	// router.StaticFile("/favicon.ico", "/app/public/favicon.ico")
+	// router.NoRoute(func(c *gin.Context) {
+	// 	c.File("/app/public/index.html")
+	// })
 
 	return router
 }
