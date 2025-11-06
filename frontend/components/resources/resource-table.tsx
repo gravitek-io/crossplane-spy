@@ -1,4 +1,4 @@
-import { StatusBadge, ScopeBadge } from "@/components/ui/status-badge";
+import { StatusBadge, ScopeBadge, DetailedStatusBadge } from "@/components/ui/status-badge";
 import { formatDistanceToNow } from "@/lib/date-utils";
 
 /**
@@ -42,9 +42,30 @@ export function ResourceTable({ resources, columns }: ResourceTableProps) {
     {
       key: "status",
       label: "Status",
-      render: (_: any, resource: any) => (
-        <StatusBadge ready={resource.status?.ready || false} />
-      ),
+      render: (_: any, resource: any) => {
+        const status = resource.status || {};
+
+        // Use detailed status badge for resources with specific status fields
+        if (
+          status.installed !== undefined ||
+          status.healthy !== undefined ||
+          status.established !== undefined
+        ) {
+          return (
+            <DetailedStatusBadge
+              status={{
+                installed: status.installed,
+                healthy: status.healthy,
+                established: status.established,
+                ready: status.ready,
+              }}
+            />
+          );
+        }
+
+        // Fallback to simple status badge
+        return <StatusBadge ready={status.ready || false} />;
+      },
     },
     {
       key: "age",

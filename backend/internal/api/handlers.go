@@ -22,11 +22,33 @@ func getResources(client *k8s.Client) gin.HandlerFunc {
 		compositions, _ := client.ListCompositions(ctx)
 		functions, _ := client.ListFunctions(ctx)
 
+		// Get ProviderConfigs count
+		providerConfigsCount := 0
+		if gvrs, err := client.DiscoverProviderConfigGVRs(ctx); err == nil {
+			for _, gvr := range gvrs {
+				if configs, err := client.ListProviderConfigs(ctx, gvr); err == nil {
+					providerConfigsCount += len(configs.Items)
+				}
+			}
+		}
+
+		// Get Composite Resources (XRs) count
+		compositeResourcesCount := 0
+		if gvrs, err := client.DiscoverXRDGVRs(ctx); err == nil {
+			for _, gvr := range gvrs {
+				if xrs, err := client.ListXRs(ctx, gvr, ""); err == nil {
+					compositeResourcesCount += len(xrs.Items)
+				}
+			}
+		}
+
 		summary := models.ResourceSummary{
-			Providers:    len(providers.Items),
-			XRDs:         len(xrds.Items),
-			Compositions: len(compositions.Items),
-			Functions:    len(functions.Items),
+			Providers:          len(providers.Items),
+			ProviderConfigs:    providerConfigsCount,
+			XRDs:               len(xrds.Items),
+			Compositions:       len(compositions.Items),
+			Functions:          len(functions.Items),
+			CompositeResources: compositeResourcesCount,
 		}
 
 		c.JSON(http.StatusOK, summary)
@@ -264,9 +286,19 @@ func getNamespaceResources(client *k8s.Client) gin.HandlerFunc {
 func convertToProviders(items []unstructured.Unstructured) []models.Provider {
 	providers := make([]models.Provider, 0, len(items))
 	for _, item := range items {
+		resourceStatus := models.ConvertToResourceStatus(&item)
+		installed, healthy := models.IsProviderHealthy(resourceStatus.Conditions)
+
+		// A Provider is "Ready" if both Installed and Healthy are true
+		resourceStatus.Ready = installed && healthy
+
 		provider := models.Provider{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
-			Status:       models.ProviderStatus{ResourceStatus: models.ConvertToResourceStatus(&item)},
+			Status: models.ProviderStatus{
+				ResourceStatus:  resourceStatus,
+				Installed:       installed,
+				Healthy:         healthy,
+			},
 		}
 		providers = append(providers, provider)
 	}
@@ -288,9 +320,18 @@ func convertToProviderConfigs(items []unstructured.Unstructured) []models.Provid
 func convertToXRDs(items []unstructured.Unstructured) []models.XRD {
 	xrds := make([]models.XRD, 0, len(items))
 	for _, item := range items {
+		resourceStatus := models.ConvertToResourceStatus(&item)
+		established := models.IsXRDEstablished(resourceStatus.Conditions)
+
+		// An XRD is "Ready" if Established is true
+		resourceStatus.Ready = established
+
 		xrd := models.XRD{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
-			Status:       models.XRDStatus{ResourceStatus: models.ConvertToResourceStatus(&item)},
+			Status: models.XRDStatus{
+				ResourceStatus: resourceStatus,
+				Established:    established,
+			},
 		}
 		xrds = append(xrds, xrd)
 	}
@@ -312,9 +353,19 @@ func convertToCompositions(items []unstructured.Unstructured) []models.Compositi
 func convertToFunctions(items []unstructured.Unstructured) []models.Function {
 	functions := make([]models.Function, 0, len(items))
 	for _, item := range items {
+		resourceStatus := models.ConvertToResourceStatus(&item)
+		installed, healthy := models.IsFunctionHealthy(resourceStatus.Conditions)
+
+		// A Function is "Ready" if both Installed and Healthy are true
+		resourceStatus.Ready = installed && healthy
+
 		function := models.Function{
 			BaseResource: models.ConvertToBaseResource(&item, models.ScopeCluster),
-			Status:       models.FunctionStatus{ResourceStatus: models.ConvertToResourceStatus(&item)},
+			Status: models.FunctionStatus{
+				ResourceStatus: resourceStatus,
+				Installed:      installed,
+				Healthy:        healthy,
+			},
 		}
 		functions = append(functions, function)
 	}

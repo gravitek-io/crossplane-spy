@@ -78,6 +78,35 @@ func IsResourceReady(conditions []Condition) bool {
 	return false
 }
 
+// IsConditionTrue checks if a specific condition type is True
+func IsConditionTrue(conditions []Condition, conditionType string) bool {
+	for _, cond := range conditions {
+		if cond.Type == conditionType && cond.Status == "True" {
+			return true
+		}
+	}
+	return false
+}
+
+// IsProviderHealthy checks if a Provider is both Installed and Healthy
+func IsProviderHealthy(conditions []Condition) (installed bool, healthy bool) {
+	installed = IsConditionTrue(conditions, "Installed")
+	healthy = IsConditionTrue(conditions, "Healthy")
+	return
+}
+
+// IsFunctionHealthy checks if a Function is both Installed and Healthy
+func IsFunctionHealthy(conditions []Condition) (installed bool, healthy bool) {
+	installed = IsConditionTrue(conditions, "Installed")
+	healthy = IsConditionTrue(conditions, "Healthy")
+	return
+}
+
+// IsXRDEstablished checks if an XRD is Established
+func IsXRDEstablished(conditions []Condition) bool {
+	return IsConditionTrue(conditions, "Established")
+}
+
 // ConvertToResourceStatus extracts status from an unstructured object
 func ConvertToResourceStatus(obj *unstructured.Unstructured) ResourceStatus {
 	status, found, _ := unstructured.NestedMap(obj.Object, "status")

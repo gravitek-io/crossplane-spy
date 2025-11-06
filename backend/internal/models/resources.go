@@ -13,6 +13,8 @@ type ProviderSpec struct {
 
 type ProviderStatus struct {
 	ResourceStatus
+	Installed       bool   `json:"installed"`
+	Healthy         bool   `json:"healthy"`
 	CurrentRevision string `json:"currentRevision,omitempty"`
 	InstalledBundle string `json:"installedBundle,omitempty"`
 }
@@ -46,6 +48,7 @@ type Names struct {
 
 type XRDStatus struct {
 	ResourceStatus
+	Established bool        `json:"established"`
 	Controllers Controllers `json:"controllers,omitempty"`
 }
 
@@ -90,6 +93,8 @@ type FunctionSpec struct {
 
 type FunctionStatus struct {
 	ResourceStatus
+	Installed       bool   `json:"installed"`
+	Healthy         bool   `json:"healthy"`
 	CurrentRevision string `json:"currentRevision,omitempty"`
 }
 
